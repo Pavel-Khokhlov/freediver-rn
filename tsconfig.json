@@ -1,8 +1,77 @@
 {
   "extends": "@react-native/typescript-config",
   "compilerOptions": {
-    "types": ["jest"]
+    /* Базовые настройки */
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM"],
+    "jsx": "react-native",
+    
+    /* Настройки модулей для React Native */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "allowJs": true,
+    "noEmit": true,
+    
+    /* Strict режимы */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "ignoreDeprecations": "6.0",
+    
+    /* Пути для импортов (алиасы) */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@contexts/*": ["./src/contexts/*"],
+      "@screens/*": ["./src/screens/*"],
+      "@store/*": ["./src/store/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@services/*": ["./src/services/*"],
+      "@types/*": ["./src/types/*"],
+      "@assets/*": ["./src/assets/*"],
+      "@locales/*": ["./src/locales/*"]
+    },
+    
+    /* Дополнительные настройки */
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "removeComments": false,
+    "sourceMap": true,
+    
+    /* Типы */
+    "types": [
+      "jest",
+      "node"
+    ]
   },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["**/node_modules", "**/Pods"]
+  
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "src/**/*",
+    "App.tsx",
+    "index.js"
+  ],
+  
+  "exclude": [
+    "**/node_modules",
+    "**/Pods",
+    "**/dist",
+    "**/build",
+    "**/android",
+    "**/ios",
+    "**/coverage"
+  ]
 }
