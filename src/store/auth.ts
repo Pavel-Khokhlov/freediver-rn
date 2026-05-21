@@ -4,21 +4,18 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 export const langs = ['en', 'ru'];
 export type LangProps = 'en' | 'ru';
 
-export interface UserLoginData {
+export interface UserProps {
   name: string;
   birthDate: string;
   gender: 'male' | 'female';
   timePB: string;
   datePB: string;
-}
-
-export interface UserProps extends UserLoginData {
-  token: string;
   created_at: Date;
 }
 
 interface AuthState {
   user: UserProps | null;
+  token: string | null;
   appLang: LangProps;
   isLoading: boolean;
   isNavigationReady: boolean;
@@ -28,11 +25,10 @@ interface AuthState {
   initializeApp: () => void;
   setAppLang: (value: LangProps) => void;
   setIsNavigationReady: (value: boolean) => void;
-  checkAuth: () => Promise<void>;
   loadUserFromStorage: () => Promise<void>;
   loadLangFromStorage: () => Promise<void>;
-  updateProfile: (data: UserLoginData) => Promise<void>;
-  login: (data: UserLoginData) => Promise<void>;
+  updateProfile: (data: UserProps) => Promise<void>;
+  login: (data: UserProps) => Promise<void>;
   logout: () => Promise<void>;
   // editUser: (params: EditUserParams) => Promise<void>;
   /*   editAvatar: (
@@ -49,6 +45,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()((set, get) => ({
   // Initial state
   user: null,
+  token: null,
   appLang: 'en',
   isLoading: true,
   isNavigationReady: false,
@@ -65,7 +62,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     set({ isNavigationReady: value });
   },
 
-  async loadLangFromStorage() {
+  loadLangFromStorage: async () => {
     try {
       const lang = await EncryptedStorage.getItem('app_lang');
       if (lang) {
@@ -78,41 +75,22 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     }
   },
 
-  checkAuth: async () => {
-    try {
-      const session = await EncryptedStorage.getItem('user_session');
-
-      if (session) {
-        const userData = JSON.parse(session);
-
-        if (userData && userData.token) {
-          set({
-            user: userData,
-            isLogged: true,
-          });
-        } else {
-          await get().logout();
-        }
-      }
-    } catch (error) {
-      console.error('Failed to check auth:', error);
-      await get().logout();
-    }
-  },
-
   loadUserFromStorage: async () => {
     try {
-      const session = await EncryptedStorage.getItem('user_session');
+      const current_user = await EncryptedStorage.getItem('freediver_user');
+      const current_token = await EncryptedStorage.getItem('freediver_token');
 
-      if (session) {
-        const userData = JSON.parse(session);
+      if (current_user && current_token) {
+        const userData = await JSON.parse(current_user);
+        // console.error('loadUserFromStorage', userData);
+        // console.error('loadTokenFromStorage', current_token);
         set({
           user: userData,
           isLogged: true,
           isLoading: false,
         });
       } else {
-        set({ isLoading: false });
+        set({ isLogged: false, isLoading: false });
       }
     } catch (error) {
       console.error('Failed to load user session:', error);
@@ -120,7 +98,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     }
   },
 
-  updateProfile: async (data: Partial<UserLoginData>) => {
+  updateProfile: async (data: Partial<UserProps>) => {
     try {
       const { user } = get();
 
@@ -137,7 +115,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
       // Сохраняем в storage
       await EncryptedStorage.setItem(
-        'user_session',
+        'freediver_user',
         JSON.stringify(updatedUser),
       );
 
@@ -150,28 +128,34 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     }
   },
 
-  login: async (data: UserLoginData) => {
+  login: async (data: UserProps) => {
     try {
       const currentUser = get().user;
+      const currentToken = get().token;
 
-      if (currentUser && !currentUser.token) {
+      if (currentUser && !currentToken) {
         const newToken = get().generateSimpleDateToken();
 
         if (newToken) {
           const updatedUser = {
             ...currentUser,
-            token: newToken,
             created_at: new Date(),
           };
 
           await EncryptedStorage.setItem(
-            'user_session',
+            'freediver_user',
             JSON.stringify(updatedUser),
+          );
+
+          await EncryptedStorage.setItem(
+            'freediver_token',
+            JSON.stringify(newToken),
           );
 
           set({
             user: updatedUser,
             isLogged: true,
+            token: newToken,
           });
           return;
         }
@@ -179,16 +163,22 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
       // Создаем нового пользователя с токеном
       const newUser: UserProps = {
-        ...data, // Все поля из UserLoginData
-        token: get().generateSimpleDateToken(), // Генерируем токен
-        created_at: new Date(), // Устанавливаем текущую дату
+        ...data,
+        created_at: new Date(),
       };
 
-      await EncryptedStorage.setItem('user_session', JSON.stringify(newUser));
+      const newToken = get().generateSimpleDateToken();
+
+      await EncryptedStorage.setItem('freediver_user', JSON.stringify(newUser));
+      await EncryptedStorage.setItem(
+        'freediver_token',
+        JSON.stringify(newToken),
+      );
 
       set({
         user: newUser,
         isLogged: true,
+        token: newToken,
       });
     } catch (error) {
       console.error('Failed to save user session:', error);
@@ -198,26 +188,11 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
   logout: async () => {
     try {
-      const { user } = get();
-
-      if (user) {
-        const updatedUser = {
-          ...user,
-          token: '',
-        };
-
-        set({
-          user: updatedUser,
-          isLogged: false,
-        });
-
-        await EncryptedStorage.setItem(
-          'user_session',
-          JSON.stringify(updatedUser),
-        );
-      } else {
-        set({ isLogged: false });
-      }
+      await EncryptedStorage.removeItem('freediver_token');
+      set({
+        token: null,
+        isLogged: false,
+      });
     } catch (error) {
       console.error('Failed to remove token:', error);
     }
@@ -225,20 +200,17 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
   deleteUser: async () => {
     try {
-      await EncryptedStorage.removeItem('user_session');
+      await EncryptedStorage.removeItem('freediver_user');
+      await EncryptedStorage.removeItem('freediver_token');
 
       set({
         user: null,
+        token: null,
         isLogged: false,
       });
     } catch (error) {
       console.error('Failed to remove user session:', error);
     }
-  },
-
-  // Синхронное действие (аналог action из MobX)
-  setAppLangSync: (value: LangProps) => {
-    set({ appLang: value });
   },
 
   // Асинхронное действие
@@ -250,23 +222,13 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       // Обновляем состояние
       set({ appLang: value });
 
-      // Обновляем язык у пользователя
-      const { user } = get();
-      if (user) {
-        const updatedUser = { ...user, lang: value };
-        await EncryptedStorage.setItem(
-          'user_session',
-          JSON.stringify(updatedUser),
-        );
-        set({ user: updatedUser });
-      }
-
       console.log('Language updated to:', value);
     } catch (error) {
       console.error('Failed to save language:', error);
     }
   },
   initializeApp: async () => {
+    await get().loadUserFromStorage();
     await get().loadLangFromStorage();
     set({ isLoading: false });
   },

@@ -6,15 +6,18 @@ import { ThemedText } from '@/components/base/themed-text';
 import { ThemedView } from '@/components/base/themed-view';
 import { useTranslator } from '@/contexts/TranslatorContext';
 import ProfileForm from '@/components/common/ProfileForm';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 export default function RegistrationScreen() {
   const {t} = useTranslator();
+  const insets = useSafeAreaInsets();
 
   return (
     <FullWidthBackgroundScrollView
       backgroundImage={require('@/assets/backgrounds/profile.webp')}
       overlayOpacity={0.6}
+      customTabbarHeight={insets.bottom}
     >
       <ThemedView transparent={true} style={[styles.screenWrapper]}>
         <ThemedText type="title" style={styles.title}>

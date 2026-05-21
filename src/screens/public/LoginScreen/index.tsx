@@ -94,10 +94,14 @@ export default function LoginScreen() {
     }
   }; */
 
-  const verifyPin = (enteredPin: string) => {
+  const verifyPin = async (enteredPin: string) => {
     // Здесь замените "1234" на вашу логику проверки PIN-кода
     if (enteredPin === '0000') {
-      navigation.navigate('Registration', { enteredPin });
+      if (!authStore.user) {
+        navigation.navigate('Registration', { enteredPin });
+      } else {
+        await authStore.login(authStore.user);
+      }
       // Очистка PIN после успешного входа
       setPin('');
       /* } else if (enteredPin === '1397') {
@@ -166,6 +170,7 @@ export default function LoginScreen() {
     <FullWidthBackgroundScrollView
       backgroundImage={require('@/assets/backgrounds/login.jpg')}
       overlayOpacity={0.6} // Adjust overlay darkness
+      customTabbarHeight={insets.bottom}
     >
       <ThemedView
         transparent={true}

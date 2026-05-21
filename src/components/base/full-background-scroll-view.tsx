@@ -35,9 +35,7 @@ export default function FullWidthBackgroundScrollView({
   // const colorScheme = useColorScheme() ?? "light";
   const { globalUIStore, authStore } = useStore();
   const insets = useSafeAreaInsets();
-  // const HEADER_HEIGHT = globalUIStore.headerHeight;
 
-  // const route = useRoute();
   const isLogged = authStore.isLogged;
 
   // Проверяем имя экрана для определения типа хедера
