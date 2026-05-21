@@ -80,17 +80,13 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const current_user = await EncryptedStorage.getItem('freediver_user');
       const current_token = await EncryptedStorage.getItem('freediver_token');
 
-      if (current_user && current_token) {
+      if (current_user) {
         const userData = await JSON.parse(current_user);
-        // console.error('loadUserFromStorage', userData);
-        // console.error('loadTokenFromStorage', current_token);
         set({
           user: userData,
-          isLogged: true,
+          isLogged: current_token ? true : false,
           isLoading: false,
         });
-      } else {
-        set({ isLogged: false, isLoading: false });
       }
     } catch (error) {
       console.error('Failed to load user session:', error);

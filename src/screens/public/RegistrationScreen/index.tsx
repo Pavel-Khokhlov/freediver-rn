@@ -17,7 +17,7 @@ export default function RegistrationScreen() {
     <FullWidthBackgroundScrollView
       backgroundImage={require('@/assets/backgrounds/profile.webp')}
       overlayOpacity={0.6}
-      customTabbarHeight={insets.bottom}
+      customTabbarHeight={insets.bottom || 30}
     >
       <ThemedView transparent={true} style={[styles.screenWrapper]}>
         <ThemedText type="title" style={styles.title}>

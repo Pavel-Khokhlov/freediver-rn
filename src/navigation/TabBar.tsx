@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   content: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    marginHorizontal: 20,
+    margin: 20,
     backgroundColor: 'rgba(8, 49, 74, 0.3)',
     borderWidth: 0.2,
     borderColor: '',

@@ -1,12 +1,15 @@
 import React, { useEffect, useMemo } from 'react';
-import { Animated, Easing, StyleSheet } from 'react-native';
+import { Animated, Easing, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/base/themed-text';
 import { useTranslator } from '@/contexts/TranslatorContext';
 import FullWidthBackgroundScrollView from '@/components/base/full-background-scroll-view';
 import VersionAppBlock from './VersionAppBlock';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const LoadingScreen = () => {
   const { t } = useTranslator();
+  const insets = useSafeAreaInsets();
+
   const opacityValue = useMemo(() => new Animated.Value(0.3), []);
 
   useEffect(() => {
@@ -35,17 +38,24 @@ const LoadingScreen = () => {
     };
   }, [opacityValue]);
 
+  const paddingBottom = insets.bottom;
+
   return (
     <FullWidthBackgroundScrollView
-          backgroundImage={require('@/assets/backgrounds/login.jpg')}
-          overlayOpacity={0.6}
-        >
+      backgroundImage={require('@/assets/backgrounds/login.jpg')}
+      overlayOpacity={0.6}
+      customTabbarHeight={paddingBottom || 30}
+    >
       {/* <FiSave color={'white'} width={200} /> */}
       <Animated.Text style={[styles.loading, { opacity: opacityValue }]}>
-        <ThemedText style={styles.text} type="subtitle">{t('mainTitle.loading')}</ThemedText>
+        <ThemedText style={styles.text} type="subtitle">
+          {t('mainTitle.loading')}
+        </ThemedText>
       </Animated.Text>
 
-      <VersionAppBlock style={styles.version} />
+      <View style={[styles.bottom, { bottom: paddingBottom || 10 }]}>
+        <VersionAppBlock style={styles.version} />
+      </View>
     </FullWidthBackgroundScrollView>
   );
 };
@@ -63,12 +73,18 @@ const styles = StyleSheet.create({
     marginTop: 200,
   },
   text: {
-    textAlign: 'center'
+    textAlign: 'center',
   },
   version: {
     marginTop: 'auto',
     paddingHorizontal: 10,
     marginBottom: 20,
+  },
+  bottom: {
+    position: 'absolute',
+    marginHorizontal: 20,
+    left: 0,
+    width: '100%',
   },
 });
 

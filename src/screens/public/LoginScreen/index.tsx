@@ -170,7 +170,7 @@ export default function LoginScreen() {
     <FullWidthBackgroundScrollView
       backgroundImage={require('@/assets/backgrounds/login.jpg')}
       overlayOpacity={0.6} // Adjust overlay darkness
-      customTabbarHeight={insets.bottom}
+      customTabbarHeight={paddingBottom || 30}
     >
       <ThemedView
         transparent={true}
@@ -228,7 +228,7 @@ export default function LoginScreen() {
           })}
         </ThemedView>
       </ThemedView>
-      <View style={[styles.bottom, { bottom: paddingBottom }]}>
+      <View style={[styles.bottom, { bottom: paddingBottom || 10 }]}>
         <VersionAppBlock />
       </View>
     </FullWidthBackgroundScrollView>

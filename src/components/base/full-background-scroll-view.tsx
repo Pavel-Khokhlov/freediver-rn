@@ -59,10 +59,10 @@ export default function FullWidthBackgroundScrollView({
       return customTabbarHeight;
     }
     if (!isLogged) {
-      return insets.bottom;
+      return insets.bottom || 30;
     }
 
-    return globalUIStore.tabbarHeight + insets.bottom;
+    return globalUIStore.tabbarHeight + (insets.bottom || 30);
   };
 
   const HEADER_HEIGHT = getHeaderHeight();
