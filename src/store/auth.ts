@@ -36,7 +36,7 @@ interface AuthState {
     title: string,
     message: string,
   ) => Promise<void>; */
-  deleteUser: () => Promise<void>;
+  removeUser: () => Promise<void>;
 
   // Helper (internal use)
   generateSimpleDateToken: () => string;
@@ -194,7 +194,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     }
   },
 
-  deleteUser: async () => {
+  removeUser: async () => {
     try {
       await EncryptedStorage.removeItem('freediver_user');
       await EncryptedStorage.removeItem('freediver_token');

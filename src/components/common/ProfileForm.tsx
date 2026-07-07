@@ -13,7 +13,7 @@ import { useStore } from '@/store';
 import { useTranslator } from '@/contexts/TranslatorContext';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { UserLoginData } from '@/store/auth';
+import { UserProps } from '@/store/auth';
 
 const INPUT_HEIGHT = 40;
 
@@ -36,7 +36,7 @@ const ProfileForm = ({ location }: ProfileFormProps) => {
   const isLogged = authStore.isLogged;
 
   // Формируем начальные данные
-  const getInitialData = useMemo((): UserLoginData => {
+  const getInitialData = useMemo((): UserProps => {
     // Для режима редактирования используем переданные данные или данные пользователя
     if (isLogged) {
       return {
@@ -45,6 +45,7 @@ const ProfileForm = ({ location }: ProfileFormProps) => {
         gender: authStore.user?.gender || 'male',
         timePB: authStore.user?.timePB || '',
         datePB: authStore.user?.datePB || '',
+        created_at: authStore.user?.created_at || new Date(),
       };
     }
 
@@ -55,6 +56,7 @@ const ProfileForm = ({ location }: ProfileFormProps) => {
       gender: 'male',
       timePB: '',
       datePB: '',
+      created_at: new Date(),
     };
   }, [
     authStore.user?.birthDate,
@@ -62,12 +64,13 @@ const ProfileForm = ({ location }: ProfileFormProps) => {
     authStore.user?.gender,
     authStore.user?.name,
     authStore.user?.timePB,
+    authStore.user?.created_at,
     isLogged,
   ]);
 
   const initialData = getInitialData;
   // Form state
-  const [formData, setFormData] = useState<UserLoginData>(initialData);
+  const [formData, setFormData] = useState<UserProps>(initialData);
 
   useEffect(() => {
     if (isLogged && authStore.user) {
@@ -77,6 +80,7 @@ const ProfileForm = ({ location }: ProfileFormProps) => {
         gender: authStore.user.gender || 'male',
         timePB: authStore.user.timePB || '',
         datePB: authStore.user.datePB || '',
+        created_at: authStore.user.created_at || new Date(),
       });
     }
   }, [authStore.user, isLogged]);
@@ -216,12 +220,13 @@ const ProfileForm = ({ location }: ProfileFormProps) => {
 
   const handleCancel = () => {
     if (isLogged) {
-      const originalData: UserLoginData = {
+      const originalData: UserProps = {
         name: authStore.user?.name || 'Freediver',
         birthDate: authStore.user?.birthDate || '',
         gender: authStore.user?.gender || 'male',
         timePB: authStore.user?.timePB || '',
         datePB: authStore.user?.datePB || '',
+        created_at: authStore.user?.created_at || new Date(),
       };
 
       setFormData(originalData);
@@ -242,6 +247,10 @@ const ProfileForm = ({ location }: ProfileFormProps) => {
     } catch (error) {
       console.error('Submit error:', error);
     }
+  };
+
+  const handleRemoveUser = async () => {
+    await authStore.removeUser();
   };
 
   const handleLogout = async () => {
@@ -362,13 +371,22 @@ const ProfileForm = ({ location }: ProfileFormProps) => {
           />
         </View>
         {isLogged && location === 'ProfileMain' && (
-          <ButtonAnimated
-            title={t('button.logout')}
-            onPress={handleLogout}
-            variant="danger"
-            size="medium"
-            fullWidth={true}
-          />
+          <>
+            <ButtonAnimated
+              title={t('button.remove')}
+              onPress={handleRemoveUser}
+              variant="danger"
+              size="medium"
+              fullWidth={true}
+            />
+            <ButtonAnimated
+              title={t('button.logout')}
+              onPress={handleLogout}
+              variant="danger"
+              size="medium"
+              fullWidth={true}
+            />
+          </>
         )}
       </View>
     </ScrollView>
